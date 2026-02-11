@@ -21,25 +21,14 @@ def about(request):
     return render(request, 'rango/about.html')
 
 def show_category(request, category_name_slug):
-# Create a context dictionary which we can pass
-# to the template rendering engine.
     context_dict = {}
     try:
 
         category = Category.objects.get(slug=category_name_slug)
-        # Retrieve all of the associated pages.
-        # The filter() will return a list of page objects or an empty list.
         pages = Page.objects.filter(category=category)
-        # Adds our results list to the template context under name pages.
         context_dict['pages'] = pages
-        # We also add the category object from
-        # the database to the context dictionary.
-        # We'll use this in the template to verify that the category exists.
         context_dict['category'] = category
     except Category.DoesNotExist:
-        # We get here if we didn't find the specified category.
-        # Don't do anything -
-        # the template will display the "no category" message for us.
         context_dict['category'] = None
         context_dict['pages'] = None
         # Go render the response and return it to the client.
@@ -52,11 +41,8 @@ def add_category(request):
         form = CategoryForm(request.POST)
         # Have we been provided with a valid form?
         if form.is_valid():
-            # Save the new category to the database.
             form.save(commit=True)
-            # Now that the category is saved, we could confirm this.
-            # For now, just redirect the user back to the index view.
-            return redirect('/rango/')
+            return redirect(reverse('rango:index'))
         else:
             print(form.errors)
 
@@ -68,9 +54,8 @@ def add_page(request, category_name_slug):
         category = Category.objects.get(slug=category_name_slug)
     except Category.DoesNotExist:
         category = None
-    # You cannot add a page to a Category that does not exist...
     if category is None:
-        return redirect('/rango/')
+        return redirect(reverse('rango:index'))
     
     form = PageForm()
 
